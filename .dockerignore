@@ -1,0 +1,12 @@
+.venv
+.git
+.env
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+dist/
+build/
+tests/
+profiles/
+docker/
