@@ -51,6 +51,7 @@ cd metricflow-server
 # Install with your warehouse adapter
 uv sync --extra bigquery
 # or: uv sync --extra redshift
+# or: uv sync --extra snowflake
 
 # Configure
 cp .env.example .env
@@ -81,6 +82,8 @@ Pre-built images are published to GitHub Container Registry:
 docker pull ghcr.io/alexboutou/metricflow-server:bigquery-latest
 # or
 docker pull ghcr.io/alexboutou/metricflow-server:redshift-latest
+# or
+docker pull ghcr.io/alexboutou/metricflow-server:snowflake-latest
 
 docker run -p 8080:8080 \
   -e MF_API_KEY=your-api-key \
@@ -98,6 +101,8 @@ Versioned tags are also available (e.g. `bigquery-0.1.0`).
 docker build --build-arg ADAPTER=bigquery -t metricflow-server .
 # or
 docker build --build-arg ADAPTER=redshift -t metricflow-server .
+# or
+docker build --build-arg ADAPTER=snowflake -t metricflow-server .
 
 docker run -p 8080:8080 \
   -e MF_API_KEY=your-api-key \
@@ -309,3 +314,4 @@ curl -X POST http://localhost:8080/admin/refresh \
 |---|---|
 | BigQuery | `bigquery` |
 | Redshift | `redshift` |
+| Snowflake | `snowflake` |
