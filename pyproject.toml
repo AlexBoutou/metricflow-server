@@ -19,6 +19,7 @@ dependencies = [
 [project.optional-dependencies]
 bigquery = ["dbt-bigquery>=1.7"]
 redshift = ["dbt-redshift>=1.7"]
+snowflake = ["dbt-snowflake>=1.7"]
 
 [project.scripts]
 metricflow-server = "metricflow_server.main:cli"
