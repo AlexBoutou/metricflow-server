@@ -73,13 +73,32 @@ curl -X POST http://localhost:8080/admin/refresh \
 
 ## Production (Docker)
 
+**Option 1 — Pull from GHCR (recommended)**
+
+Pre-built images are published to GitHub Container Registry:
+
 ```bash
-# Build — pick your adapter
+docker pull ghcr.io/alexboutou/metricflow-server:bigquery-latest
+# or
+docker pull ghcr.io/alexboutou/metricflow-server:redshift-latest
+
+docker run -p 8080:8080 \
+  -e MF_API_KEY=your-api-key \
+  -e MF_ADMIN_KEY=your-admin-key \
+  -e MF_DBT_PROFILE_NAME=your-profile-name \
+  -e MF_PROFILES_B64=$(base64 -i profiles.yml | tr -d '\n') \
+  ghcr.io/alexboutou/metricflow-server:bigquery-latest
+```
+
+Versioned tags are also available (e.g. `bigquery-0.1.0`).
+
+**Option 2 — Build from source**
+
+```bash
 docker build --build-arg ADAPTER=bigquery -t metricflow-server .
 # or
 docker build --build-arg ADAPTER=redshift -t metricflow-server .
 
-# Run
 docker run -p 8080:8080 \
   -e MF_API_KEY=your-api-key \
   -e MF_ADMIN_KEY=your-admin-key \
@@ -222,7 +241,7 @@ Run a metric query. The request parameters are intentionally identical to those 
 | `metrics` | `list[str]` | yes | Metric names to query |
 | `group_by` | `list[str]` | no | Dimension names to group by |
 | `where` | `list[str]` | no | SQL where clauses |
-| `order_by` | `list[str]` | no | Fields to order by. Prefix with `-` for descending |
+| `order_by` | `str` | no | Fields to order by. Prefix with `-` for descending |
 | `limit` | `int` | no | Max number of rows |
 
 ```bash
