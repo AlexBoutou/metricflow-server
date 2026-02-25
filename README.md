@@ -245,7 +245,7 @@ Run a metric query. The request parameters are intentionally identical to those 
 |---|---|---|---|
 | `metrics` | `list[str]` | yes | Metric names to query |
 | `group_by` | `list[str]` | no | Dimension names to group by |
-| `where` | `list[str]` | no | SQL where clauses |
+| `where` | `list[str]` | no | Jinja filter templates (e.g. `{{ Dimension('entity__dim') }} = 'value'`). Multiple entries are combined with `AND` |
 | `order_by` | `str` | no | Fields to order by. Prefix with `-` for descending |
 | `limit` | `int` | no | Max number of rows |
 
