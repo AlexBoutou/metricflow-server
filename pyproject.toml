@@ -18,6 +18,9 @@ dependencies = [
 
 [project.optional-dependencies]
 bigquery = ["dbt-bigquery>=1.7"]
+clickhouse = ["dbt-clickhouse>=1.7"]
+databricks = ["dbt-databricks>=1.7"]
+postgres = ["dbt-postgres>=1.7"]
 redshift = ["dbt-redshift>=1.7"]
 snowflake = ["dbt-snowflake>=1.7"]
 

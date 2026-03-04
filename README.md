@@ -50,6 +50,9 @@ cd metricflow-server
 
 # Install with your warehouse adapter
 uv sync --extra bigquery
+# or: uv sync --extra clickhouse
+# or: uv sync --extra databricks
+# or: uv sync --extra postgres
 # or: uv sync --extra redshift
 # or: uv sync --extra snowflake
 
@@ -99,10 +102,11 @@ Versioned tags are also available (e.g. `bigquery-0.1.0`).
 
 ```bash
 docker build --build-arg ADAPTER=bigquery -t metricflow-server .
-# or
-docker build --build-arg ADAPTER=redshift -t metricflow-server .
-# or
-docker build --build-arg ADAPTER=snowflake -t metricflow-server .
+# or: --build-arg ADAPTER=clickhouse
+# or: --build-arg ADAPTER=databricks
+# or: --build-arg ADAPTER=postgres
+# or: --build-arg ADAPTER=redshift
+# or: --build-arg ADAPTER=snowflake
 
 docker run -p 8080:8080 \
   -e MF_API_KEY=your-api-key \
@@ -111,6 +115,17 @@ docker run -p 8080:8080 \
   -e MF_PROFILES_B64=$(base64 -i profiles.yml | tr -d '\n') \
   metricflow-server
 ```
+
+**Option 3 — Docker Compose**
+
+```bash
+cp .env.example .env
+# Edit .env — set ADAPTER, MF_API_KEY, MF_ADMIN_KEY, MF_DBT_PROFILE_NAME, MF_PROFILES_B64
+
+docker compose up --build
+```
+
+The `ADAPTER` variable in `.env` controls which warehouse adapter is installed (`bigquery`, `clickhouse`, `databricks`, `postgres`, `redshift`, `snowflake`). All configuration is read from `.env`.
 
 ### Preparing your profiles.yml
 
@@ -313,5 +328,8 @@ curl -X POST http://localhost:8080/admin/refresh \
 | Adapter | Extra |
 |---|---|
 | BigQuery | `bigquery` |
+| ClickHouse | `clickhouse` |
+| Databricks | `databricks` |
+| PostgreSQL | `postgres` |
 | Redshift | `redshift` |
 | Snowflake | `snowflake` |
