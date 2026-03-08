@@ -2,7 +2,7 @@
 
 **Self-host dbt's MetricFlow semantic layer as a REST API.**
 
-No dbt Cloud contract needed. Push your `semantic_manifest.json`, query metrics from anywhere.
+No dbt Cloud contract needed. Push your `semantic_manifest.json`, query metrics from anywhere. An optional [MCP server](#mcp-server) is also available for direct integration with Claude, Copilot and other AI assistants.
 
 ---
 
@@ -107,6 +107,7 @@ docker build --build-arg ADAPTER=bigquery -t metricflow-server .
 # or: --build-arg ADAPTER=postgres
 # or: --build-arg ADAPTER=redshift
 # or: --build-arg ADAPTER=snowflake
+# add --build-arg MCP_ENABLED=true to enable the MCP server at /mcp
 
 docker run -p 8080:8080 \
   -e MF_API_KEY=your-api-key \
@@ -120,7 +121,7 @@ docker run -p 8080:8080 \
 
 ```bash
 cp .env.example .env
-# Edit .env — set ADAPTER, MF_API_KEY, MF_ADMIN_KEY, MF_DBT_PROFILE_NAME, MF_PROFILES_B64
+# Edit .env — set ADAPTER, MCP_ENABLED, MF_API_KEY, MF_ADMIN_KEY, MF_DBT_PROFILE_NAME, MF_PROFILES_B64
 
 docker compose up --build
 ```
@@ -319,6 +320,53 @@ curl -X POST http://localhost:8080/admin/refresh \
 
 ```json
 { "status": "ok" }
+```
+
+---
+
+## MCP server
+
+The server exposes a [Model Context Protocol](https://modelcontextprotocol.io) endpoint at `/mcp` (Streamable HTTP transport, spec revision `2025-11-25`). Once connected, an AI Agent can discover and query your metrics directly without any custom tooling.
+
+**Available tools:**
+
+| Tool | Description |
+|---|---|
+| `list_metrics` | List all metrics with their types and queryable dimensions |
+| `get_dimension_values` | Get distinct values for a dimension (with configurable limit) |
+| `query_metrics` | Run a metric query — returns rows + generated SQL |
+
+The MCP endpoint is protected by the same `MF_API_KEY` as the REST API.
+
+### Claude Desktop
+
+Add this to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "metricflow": {
+      "type": "http",
+      "url": "http://localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MF_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Replace `localhost:8080` with your server address for a remote deployment.
+
+### Reverse proxy note (nginx)
+
+```nginx
+location /mcp {
+    proxy_pass http://metricflow-server:8080/mcp;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_http_version 1.1;
+}
 ```
 
 ---

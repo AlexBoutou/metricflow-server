@@ -4,6 +4,7 @@ services:
       context: .
       args:
         ADAPTER: ${ADAPTER}
+        MCP_ENABLED: ${MCP_ENABLED:-false}
     env_file: .env
     ports:
       - "8080:8080"

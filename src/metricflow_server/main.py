@@ -14,6 +14,14 @@ from metricflow_server.engine_manager import engine_manager
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
 
+# Optional MCP support
+try:
+    from metricflow_server.mcp_server import mcp_app, mcp_session_manager
+
+    _mcp_available = True
+except ImportError:
+    _mcp_available = False
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,7 +31,12 @@ async def lifespan(app: FastAPI):
     try:
         engine_manager.init_adapter(profiles_dir)
         logger.info("Adapter ready – waiting for manifest via POST /admin/refresh")
-        yield
+        if _mcp_available:
+            async with mcp_session_manager.run():
+                logger.info("MCP endpoint enabled at /mcp")
+                yield
+        else:
+            yield
     finally:
         settings.cleanup_profiles_dir()
 
@@ -31,6 +44,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="MetricFlow Server", version="0.1.0", lifespan=lifespan)
 app.include_router(api_router)
 app.include_router(admin_router)
+
+if _mcp_available:
+    app.mount("/mcp", mcp_app)
+else:
+    logger.info("MCP not available (install with: uv sync --extra mcp)")
 
 
 def cli() -> None:

@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 
 ARG ADAPTER
+ARG MCP_ENABLED=false
 
 # Create non-root user
 RUN groupadd --gid 1001 appuser && \
@@ -11,7 +12,11 @@ WORKDIR /app
 COPY pyproject.toml LICENSE ./
 COPY src/ src/
 
-RUN pip install --no-cache-dir ".[$ADAPTER]"
+RUN if [ "$MCP_ENABLED" = "true" ]; then \
+        pip install --no-cache-dir ".[$ADAPTER,mcp]"; \
+    else \
+        pip install --no-cache-dir ".[$ADAPTER]"; \
+    fi
 
 RUN mkdir -p /app/.dbt && chown -R appuser:appuser /app
 

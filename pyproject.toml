@@ -17,6 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+mcp = ["mcp>=1.0"]
 bigquery = ["dbt-bigquery>=1.7"]
 clickhouse = ["dbt-clickhouse>=1.7"]
 databricks = ["dbt-databricks>=1.7"]
