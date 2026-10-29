@@ -55,6 +55,18 @@ class MetricResponse(BaseModel):
     dimensions: list[DimensionResponse] = []
 
 
+class MetricDetail(BaseModel):
+    name: str
+    label: Optional[str] = None
+    description: Optional[str] = None
+    type: str
+    dimensions: list[DimensionResponse]
+    time_granularities: list[str]
+    tags: Optional[list[str]] = None
+    domain: Optional[str] = None
+    owner: Optional[str] = None
+
+
 class HealthResponse(BaseModel):
     status: str
 

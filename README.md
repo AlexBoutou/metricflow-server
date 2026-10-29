@@ -249,6 +249,42 @@ curl http://localhost:8080/api/v1/metrics \
 ]
 ```
 
+### `GET /api/v1/metrics/{metric_name}`
+
+Get details for a metric. Requires `Authorization: Bearer <MF_API_KEY>`.
+
+```bash
+curl http://localhost:8080/api/v1/metrics/revenue \
+  -H "Authorization: Bearer $MF_API_KEY"
+```
+
+The response includes the metric's dimensions and supported time granularities. `tags`, `domain`, and `owner` are `null` when the manifest does not provide them. This endpoint does not execute a query or return generated SQL.
+
+```json
+{
+  "name": "revenue",
+  "label": "Revenue",
+  "description": "Sum of product revenue",
+  "type": "MetricType.SIMPLE",
+  "dimensions": [
+    {
+      "name": "location_name",
+      "qualified_name": "location__location_name",
+      "description": null,
+      "type": "DimensionType.CATEGORICAL",
+      "label": null,
+      "queryable_time_granularities": []
+    }
+  ],
+  "time_granularities": ["DAY"],
+  "tags": null,
+  "domain": null,
+  "owner": null
+}
+```
+
+An unknown metric returns `404` with `{"detail":"Metric '<metric_name>' not found"}`.
+
 ---
 
 ### `POST /api/v1/query`

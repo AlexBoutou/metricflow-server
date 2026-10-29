@@ -17,6 +17,7 @@ from metricflow_server.engine_manager import engine_manager
 from .schemas import (
     DimensionResponse,
     HealthResponse,
+    MetricDetail,
     MetricResponse,
     QueryRequest,
     QueryResponse,
@@ -54,6 +55,22 @@ def _serialize_dimension(d) -> DimensionResponse:
         label=d.label,
         queryable_time_granularities=granularities,
     )
+
+
+def _metric_metadata(metric, name: str) -> list[str] | str | None:
+    value = getattr(metric, name, None)
+    if value is None:
+        config = getattr(metric, "config", None)
+        metadata = getattr(config, "meta", None)
+        if isinstance(metadata, dict):
+            value = metadata.get(name)
+
+    expected_type = list if name == "tags" else str
+    if not isinstance(value, expected_type):
+        return None
+    if name == "tags" and not all(isinstance(tag, str) for tag in value):
+        return None
+    return value
 
 
 # ------------------------------------------------------------------
@@ -163,3 +180,38 @@ def list_metrics():
             dimensions=dims,
         ))
     return results
+
+
+@router.get(
+    "/metrics/{metric_name}",
+    response_model=MetricDetail,
+    dependencies=[Depends(verify_api_key)],
+)
+def get_metric_detail(metric_name: str):
+    engine = _require_engine()
+    metric = next((m for m in engine.list_metrics() if m.name == metric_name), None)
+    if metric is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Metric '{metric_name}' not found",
+        )
+
+    dimensions = [_serialize_dimension(d) for d in metric.dimensions]
+    time_granularities = [
+        granularity
+        for dimension in dimensions
+        if dimension.qualified_name == "metric_time"
+        for granularity in dimension.queryable_time_granularities
+    ]
+
+    return MetricDetail(
+        name=metric.name,
+        label=metric.label,
+        description=metric.description,
+        type=str(metric.type),
+        dimensions=dimensions,
+        time_granularities=time_granularities,
+        tags=_metric_metadata(metric, "tags"),
+        domain=_metric_metadata(metric, "domain"),
+        owner=_metric_metadata(metric, "owner"),
+    )
